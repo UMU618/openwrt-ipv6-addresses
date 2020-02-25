@@ -13,4 +13,5 @@ case $DEVICE in
 esac
 
 IP=$(ip -6 address show $DEVICE scope global | grep -v ' fd' | sed -n 's/.*inet6 \([0-9a-f:]\+\).*/\1/p' | head -n 1)
-wget -O- -q --bind-address=$IP "https://dynv6.com/api/update?zone=$zone&ipv6=$IP&token=$token"
+[ -z $IP ] && exit 0
+(sleep 6; wget -O- -q --bind-address=$IP "https://dynv6.com/api/update?zone=$zone&ipv6=$IP&token=$token") &
