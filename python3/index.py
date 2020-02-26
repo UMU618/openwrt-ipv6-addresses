@@ -28,7 +28,8 @@ def get_ipv6_addresses():
         with open(INET6_PATH) as f:
             for line in f:
                 p = line.split()
-                if p[3] == '00' and (int(p[4], 16) & 0x80) != 0x80:
+                if p[3] == '00' and (int(p[4], 16) & 0x80) != 0x80 \
+                        and not p[0].startswith('fc') and not p[0].startswith('fd'):
                     ip = net_hex_to_ipv6(p[0])
                     addresses.append(socket.inet_ntop(
                         socket.AF_INET6, socket.inet_pton(socket.AF_INET6, ip)))
