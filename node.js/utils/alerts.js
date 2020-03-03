@@ -25,7 +25,7 @@ module.exports = {
     let url = 'https://oapi.dingtalk.com/robot/send?access_token=' + token
     if (secret) {
       const timestamp = Date.now()
-      url += '&timestamp=' + timestamp + "&sign="
+      url += '&timestamp=' + timestamp + '&sign='
         + encodeURIComponent(module.exports.getDingtalkSign(timestamp, secret))
     }
     fetch(url, {
@@ -34,9 +34,9 @@ module.exports = {
         'Content-Type': 'application/json'
       }
       , body: JSON.stringify({
-        "msgtype": "text"
-        , "text": {
-          "content": text
+        msgtype: 'text'
+        , text: {
+          content: text
         }
       })
     }).then((res) => {
@@ -79,7 +79,7 @@ module.exports = {
     }
     const url = 'https://open.feishu.cn/open-apis/bot/hook/' + token
     const jo = {
-      "text": text
+      text: text
     }
     if (title) {
       jo.title = title
