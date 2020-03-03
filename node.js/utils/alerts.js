@@ -71,4 +71,39 @@ module.exports = {
         console.log(e)
       })
   }
+
+  , sendFeishu: (token, text, title) => {
+    if (!token || !text) {
+      console.log('Message:', text)
+      return
+    }
+    const url = 'https://open.feishu.cn/open-apis/bot/hook/' + token
+    const jo = {
+      "text": text
+    }
+    if (title) {
+      jo.title = title
+    }
+    fetch(url, {
+      method: 'POST'
+      , headers: {
+        'Content-Type': 'application/json'
+      }
+      , body: JSON.stringify(jo)
+    }).then((res) => {
+      if (res.ok) {
+        return res.json()
+      } else {
+        console.error('status =', res.status)
+      }
+    }, (err) => {
+      console.log(err)
+    }).then((jo) => {
+      if (jo.ok === true) {
+        console.log('Message sent:', text)
+      } else {
+        console.error('fail to send feishu, response =', jo)
+      }
+    })
+  }
 }
