@@ -9,7 +9,15 @@
 const fetch = require('node-fetch')
 
 module.exports = {
-  getDingtalkSign: (timestamp, secret) => {
+  timeout: 0
+
+  , setTimeout(t) {
+    if (typeof(t) === 'number') {
+      module.exports.timeout = t
+    }
+  }
+
+  , getDingtalkSign: (timestamp, secret) => {
     const to_sign = timestamp + '\n' + secret
     const crypto = require('crypto')
     const hmac = crypto.createHmac('sha256', secret)
@@ -18,7 +26,7 @@ module.exports = {
 
   , sendDingtalk: (token, secret, text) => {
     if (!token || !text) {
-      console.log('Message:', text)
+      console.log('sendDingtalk() local message:', text)
       return
     }
 
@@ -39,42 +47,64 @@ module.exports = {
           content: text
         }
       })
+      , timeout: module.exports.timeout
     }).then((res) => {
       if (res.ok) {
         return res.json()
       } else {
-        console.error('status =', res.status)
+        console.error(
+          `sendDingtalk() failed, status = ${res.status}, message: ${text}`)
+        return null
       }
     }, (err) => {
-      console.log(err)
+      console.error(err)
     }).then((jo) => {
-      if (jo.errcode === 0) {
-        console.log('Message sent:', text)
-      } else {
-        console.error('fail to send dingtalk, response =', jo)
+      if (jo !== null) {
+        if (jo.errcode === 0) {
+          console.log('sendDingtalk() succeeded:', text)
+        } else {
+          console.error(
+            `sendDingtalk() failed: ${JSON.stringify(jo)}, message: ${text}`)
+        }
       }
     })
   }
 
   , sendTelegram: (token, chat_id, text) => {
+    if (!token || !chat_id || !text) {
+      console.log('sendTelegram() local message:', text)
+      return
+    }
     fetch('https://api.telegram.org/bot' + token + '/sendMessage?'
       + require('querystring').stringify({
         chat_id: chat_id, text: text
-      }), { method: 'POST' })
+      }), { method: 'POST', timeout: module.exports.timeout })
       .then(function (res) {
         if (res.ok) {
-          console.log('Telegram message sent!')
+          return res.json()
         } else {
-          console.error('status = ' + res.status)
+          console.error(
+            `sendTelegram() failed, status = ${res.status}, message: ${text}`)
+          return null
         }
-      }, function (e) {
-        console.log(e)
+      }, function (err) {
+        console.error(err)
+      })
+      .then((jo) => {
+        if (jo !== null) {
+          if (jo.ok) {
+            console.log('sendTelegram() succeeded:', text)
+          } else {
+            console.error(
+              `sendTelegram() failed: ${JSON.stringify(jo)}, message: ${text}`)
+          }
+        }
       })
   }
 
   , sendFeishu: (token, text, title) => {
     if (!token || !text) {
-      console.log('Message:', text)
+      console.log('sendFeishu() local message:', text)
       return
     }
     const url = 'https://open.feishu.cn/open-apis/bot/hook/' + token
@@ -90,19 +120,25 @@ module.exports = {
         'Content-Type': 'application/json'
       }
       , body: JSON.stringify(jo)
+      , timeout: module.exports.timeout
     }).then((res) => {
       if (res.ok) {
         return res.json()
       } else {
-        console.error('status =', res.status)
+        console.error(
+          `sendFeishu() failed, status = ${res.status}, message: ${text}`)
+        return null
       }
     }, (err) => {
       console.log(err)
     }).then((jo) => {
-      if (jo.ok === true) {
-        console.log('Message sent:', text)
-      } else {
-        console.error('fail to send feishu, response =', jo)
+      if (jo !== null) {
+        if (jo.ok === true) {
+          console.log('sendFeishu() succeeded:', text)
+        } else {
+          console.error(
+            `sendFeishu() failed: ${JSON.stringify(jo)}, message: ${text}`)
+        }
       }
     })
   }
