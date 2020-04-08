@@ -2,6 +2,7 @@
  * @author UMU618 <umu618@hotmail.com>
  * @copyright MEET.ONE 2019
  * @description Use block-always-using-brace npm-coding-style.
+ * @lastModified 2020-04-08 14:37
  */
 
 'use strict'
